@@ -3,9 +3,17 @@ let ctx
 let squareWidth = 20
 let squareHeight = 20
 let canvasWidth = 800
-let canvasHeight = 400
+let canvasHeight = 600
 let martians = []
 let avatar
+//Images
+let pathTilemap = '../assets/images/tilemap.jpg'
+let tilemap = document.createElement('IMG')
+tilemap.src = pathTilemap
+let pathElements = '../assets/images/elements.png'
+let elements = document.createElement('IMG')
+elements.src = pathElements
+
 
 const board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -28,52 +36,135 @@ const board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 /* Classes***************************************************************************************************************** */
-class Bullet{
-    constructor(posX,posY,width,height){
-        this._posX = posX
-        this._posY = posY
+class Block{
+    constructor(width,height,posX,posY){
         this._width = width
         this._height = height
-    }
-
-    get posX(){
-        return this._posX
-    }
-    set posX(posX){
         this._posX = posX
-    }
-    get posY(){
-        return this._posY
-    }
-    set posY(posY){
         this._posY = posY
     }
-    get width(){
+    get width() {
         return this._width
     }
-    set width(width){
+    set width(width) {
         this._width = width
     }
-    get height(){
+    get height() {
         return this._height
     }
-    set height(height){
+    set height(height) {
         this._height = height
     }
-    move(){
-        this._posY--
+    get posX() {
+        return this._posX
+    }
+    set posX(posX) {
+        this._posX = posX
+    }
+    get posY() {
+        return this._posY
+    }
+    set posY(posY) {
+        this._posY = posY
     }
     draw(){
-        ctx.fillStyle = 'red'
-        ctx.fillRect(this._posX * squareWidth,this._posY * squareHeight,squareWidth,squareHeight)
+        console.log('entro')
+        ctx.drawImage(elements,64,0,32,32,this._posX * squareWidth,this._posY * squareHeight,this._width,this._height)
+    }
+}
+let blocks = [
+    new Block(squareWidth,squareHeight,8,25),
+    new Block(squareWidth,squareHeight,9,25),
+    new Block(squareWidth,squareHeight,10,25),
+    new Block(squareWidth,squareHeight,8,26),
+    new Block(squareWidth,squareHeight,9,26),
+    new Block(squareWidth,squareHeight,10,26),
+    new Block(squareWidth,squareHeight,29,25),
+    new Block(squareWidth,squareHeight,30,25),
+    new Block(squareWidth,squareHeight,31,25),
+    new Block(squareWidth,squareHeight,29,26),
+    new Block(squareWidth,squareHeight,30,26),
+    new Block(squareWidth,squareHeight,31,26)
+]
+class Bullet {
+    constructor(width,height,posX, posY,color) {
+        this._width = width
+        this._height = height
+        this._posX = posX
+        this._posY = posY
+        this._color = color
+    }
+    
+    get width() {
+        return this._width
+    }
+    set width(width) {
+        this._width = width
+    }
+    get height() {
+        return this._height
+    }
+    set height(height) {
+        this._height = height
+    }
+    get posX() {
+        return this._posX
+    }
+    set posX(posX) {
+        this._posX = posX
+    }
+    get posY() {
+        return this._posY
+    }
+    set posY(posY) {
+        this._posY = posY
+    }
+    get color() {
+        return this._color
+    }
+    set color(color) {
+        this._color = color
+    }
+    move() {
+        this._posY--
+    }
+    draw() {
+        ctx.fillStyle = this._color
+        ctx.fillRect((this._posX * squareWidth) + 7, this._posY * squareHeight, 5, 5)
+    }
+    bulletIsOnMartian() {
+        for (const martian of martians) {
+            if (this._posX == martian._posX && this._posY == martian._posY){
+                return martian
+            }
+        }
+        return false
+    }
+    bulletIsOnBlock() {
+        for (const block of blocks) {
+            if (this._posX == block._posX && this._posY == block._posY){
+                return block
+            }
+        }
+        return false
     }
 }
 
 class Martian {
-    constructor(width, height, posX, posY, life, frameX, frameY, left = true, right = false,bullets = []) {
+    constructor(width, height, posX, posY, life, frameX, frameY, left = true, right = false, bullets = []) {
         this._width = width
         this._height = height
         this._posX = posX
@@ -148,24 +239,23 @@ class Martian {
     decreaseLife() {
         this._life--
     }
-    drawOnBoard(color){
-        ctx.fillStyle = color
-        ctx.fillRect(this._posX * squareWidth,this._posY * squareHeight, squareWidth, squareHeight)
+    drawOnBoard() {
+        ctx.drawImage(tilemap,this.frameX,this.frameY,this._width,this._height,this._posX * squareWidth, this._posY * squareHeight, squareWidth, squareHeight)
     }
-    moveHorizontal(){
-        if(this._left){
+    moveHorizontal() {
+        if (this._left) {
             this._posX--
             this._left = false
         }
-        else{
+        else {
             this._posX++
             this._left = true
         }
     }
-    moveVertical(){
+    moveVertical() {
         this._posY++
     }
-    
+
 }
 
 
@@ -192,14 +282,14 @@ class Martian {
 const createMartians = (number) => {
     let posX = 1
     for (let i = 0; i < number; i++) {
-        martians.push(new Martian(squareWidth,squareHeight,posX,0,1))
+        martians.push(new Martian(70,125, posX, 0, 1,70, 100))
         posX += 2
     }
 }
 
 const drawMatians = () => {
     martians.forEach(martian => {
-        martian.drawOnBoard('yellow')
+        martian.drawOnBoard()
     });
 }
 
@@ -213,27 +303,53 @@ const moveMartiansY = () => {
         martian.moveVertical()
     });
 }
-const moveByPressKey = (event) =>{
-        if(event.key == 'ArrowRight' && avatar._posX < board[0].length - 1){
-            avatar._posX++
-        }
-        if(event.key == 'ArrowLeft' && avatar._posX > 0){
-            avatar._posX--
-        }
-    
+const moveByPressKey = (event) => {
+    if (event.key == 'ArrowRight' && avatar._posX < board[0].length - 1) {
+        avatar._posX++
+    }
+    if (event.key == 'ArrowLeft' && avatar._posX > 0) {
+        avatar._posX--
+    }
+
 }
-const shoot = () =>{
-    avatar.bullets.push(new Bullet(avatar._posX,avatar._posY,squareWidth,squareHeight))
+const shoot = () => {
+    avatar.bullets.push(new Bullet(10,10,avatar._posX,avatar._posY,'white'))
 }
 
-const bulletLoop = () =>{
+const removeEnemeies = () => {
+    martians = martians.filter((element) => element._life != 0)
+}
+
+const removeBlocks = (block) => {
+    blocks = blocks.filter((element) => element != block)
+}
+
+const removeBullet = (bullet) => {
+    avatar._bullets = avatar._bullets.filter((element) => element != bullet)
+}
+
+const bulletLoop = () => {
     avatar._bullets.forEach(bullet => {
         bullet.move()
         bullet.draw()
+        let enemyDown = bullet.bulletIsOnMartian()
+        if (enemyDown) {
+            enemyDown._life--
+            removeEnemeies()
+            removeBullet(bullet)
+        }
+        let blockDown = bullet.bulletIsOnBlock()
+        if (blockDown) {
+            removeBlocks(blockDown)
+            removeBullet(bullet)
+        }
     });
-    // if(avatar.bullets[0]._posY < 0){
-    //     avatar.bullets.shift()
-    // }
+}
+
+const drawBlocks = () => {
+    blocks.forEach(block => {
+        block.draw()
+    });
 }
 
 //Final about create elements
@@ -245,7 +361,7 @@ const bulletLoop = () =>{
 const drawCanvas = () => {
     for (let i = 0; i < board.length; i++) {
         for (let j = 0; j < board[0].length; j++) {
-            if(board[i][j] == 0){
+            if (board[i][j] == 0) {
                 ctx.fillRect(j * squareWidth, i * squareHeight, squareWidth, squareHeight)
                 ctx.fillStyle = 'black'
             }
@@ -262,19 +378,20 @@ const gameLoop = () => {
     clearCanvas()
     drawCanvas()
     drawMatians()
+    drawBlocks()
     avatar.drawOnBoard('white')
-    
+
 }
 
 const start = () => {
     const canvas = document.getElementById('canvas')
     ctx = canvas.getContext('2d')
-    avatar = new Martian(squareWidth,squareHeight,10,19,3,10,10)
+    avatar = new Martian( 100, 150, 10, 29, 3,600, 490)
     createMartians(20)
-    setInterval(moveMartiansX,1000)
-    setInterval(moveMartiansY,5000)
-    setInterval(bulletLoop,200)
-    setInterval(gameLoop,1000/60)
+    setInterval(moveMartiansX, 1000)
+    setInterval(moveMartiansY, 5000)
+    setInterval(bulletLoop, 200)
+    setInterval(gameLoop, 1000 / 60)
 }
 
 //Events
@@ -283,10 +400,10 @@ document.addEventListener('DOMContentLoaded', () => {
     start()
 })
 
-document.addEventListener('keydown',moveByPressKey)
+document.addEventListener('keydown', moveByPressKey)
 
-document.addEventListener('keydown',(event) => {
-    if(event.key == 's'){
+document.addEventListener('keydown', (event) => {
+    if (event.key == 's') {
         shoot()
     }
 })
