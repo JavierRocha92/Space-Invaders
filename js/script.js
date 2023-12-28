@@ -1,3 +1,6 @@
+/* Elements form DOM */
+const ending = document.getElementById('ending')
+
 /* variables */
 let ctx
 let squareWidth = 20
@@ -6,6 +9,7 @@ let canvasWidth = 800
 let canvasHeight = 600
 let martians = []
 let avatar
+
 //Images
 let pathTilemap = '../assets/images/tilemap.jpg'
 let tilemap = document.createElement('IMG')
@@ -13,6 +17,17 @@ tilemap.src = pathTilemap
 let pathElements = '../assets/images/elements.png'
 let elements = document.createElement('IMG')
 elements.src = pathElements
+let pathBlock = '../assets/images/block.png'
+let imageBlock = document.createElement('IMG')
+imageBlock.src = pathBlock
+let itemImage = document.createElement('IMG')
+
+//Interval variables
+let horizaontalMoving
+let verticalMoving
+let bulletGameLoop
+let gameLoopInterval
+let itemsMoving
 
 
 const board = [
@@ -49,13 +64,16 @@ const board = [
 ]
 
 /* Classes***************************************************************************************************************** */
-class Block {
-    constructor(width, height, posX, posY) {
+
+class Item {
+    constructor(width, height, posX, posY, picture) {
         this._width = width
         this._height = height
         this._posX = posX
         this._posY = posY
+        this._picture = picture
     }
+    static items = []
     get width() {
         return this._width
     }
@@ -80,30 +98,39 @@ class Block {
     set posY(posY) {
         this._posY = posY
     }
+    get picture() {
+        return this._picture
+    }
+    set picture(picture) {
+        this._picture = picture
+    }
     draw() {
-        console.log('entro')
-        ctx.drawImage(elements, 64, 0, 32, 32, this._posX * squareWidth, this._posY * squareHeight, this._width, this._height)
+        ctx.drawImage(this._picture, this._posX * squareWidth, this._posY * squareHeight, this._width, this._height)
+    }
+   
+    move(){
+        this._posY++
     }
 }
 let blocks = [
-    new Block(squareWidth, squareHeight, 8, 25),
-    new Block(squareWidth, squareHeight, 9, 25),
-    new Block(squareWidth, squareHeight, 10, 25),
-    new Block(squareWidth, squareHeight, 8, 26),
-    new Block(squareWidth, squareHeight, 9, 26),
-    new Block(squareWidth, squareHeight, 10, 26),
-    new Block(squareWidth, squareHeight, 18, 25),
-    new Block(squareWidth, squareHeight, 19, 25),
-    new Block(squareWidth, squareHeight, 20, 25),
-    new Block(squareWidth, squareHeight, 18, 26),
-    new Block(squareWidth, squareHeight, 19, 26),
-    new Block(squareWidth, squareHeight, 20, 26),
-    new Block(squareWidth, squareHeight, 29, 25),
-    new Block(squareWidth, squareHeight, 30, 25),
-    new Block(squareWidth, squareHeight, 31, 25),
-    new Block(squareWidth, squareHeight, 29, 26),
-    new Block(squareWidth, squareHeight, 30, 26),
-    new Block(squareWidth, squareHeight, 31, 26)
+    new Item(squareWidth, squareHeight, 8, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 9, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 10, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 8, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 9, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 10, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 18, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 19, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 20, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 18, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 19, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 20, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 29, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 30, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 31, 25, imageBlock),
+    new Item(squareWidth, squareHeight, 29, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 30, 26, imageBlock),
+    new Item(squareWidth, squareHeight, 31, 26, imageBlock)
 ]
 class Bullet {
     constructor(width, height, posX, posY, color) {
@@ -145,10 +172,10 @@ class Bullet {
         this._color = color
     }
     move(way) {
-        if(way == 'up'){
+        if (way == 'up') {
             this._posY--
         }
-        else{
+        else {
             this._posY++
         }
     }
@@ -175,7 +202,7 @@ class Bullet {
 }
 
 class Martian {
-    constructor(width, height, posX, posY, life, frameX, frameY, left = true, right = false, bullets = []) {
+    constructor(width, height, posX, posY, life, frameX, frameY, item = false, left = true, bullets = []) {
         this._width = width
         this._height = height
         this._posX = posX
@@ -184,9 +211,10 @@ class Martian {
         this._frameX = frameX
         this._frameY = frameY
         this._left = left
-        this._right = right
+        this._item = item
         this._bullets = bullets
     }
+    static enemiesDown = 0
     get width() {
         return this._width
     }
@@ -235,11 +263,11 @@ class Martian {
     set left(left) {
         this._left = left
     }
-    get right() {
-        return this._right
+    get item() {
+        return item
     }
-    set right(right) {
-        this._right = right
+    set item(item) {
+        this._item = item
     }
     get bullets() {
         return this._bullets
@@ -267,9 +295,16 @@ class Martian {
         this._posY++
     }
     shoot() {
-        this._bullets.push(new Bullet(10, 10, this._posX, this._posY,'yellow'))
+        this._bullets.push(new Bullet(10, 10, this._posX, this._posY, 'yellow'))
     }
-
+    drop(){
+        console.log('entro en el emtodo de drop')
+        let imagesItem = ['../assets/images/powerUps__doublePoints.jpg','../assets/images/powerUps__hearth.jpg','../assets/images/powerUps__field.jpg','../assets/images/powerUps__random.jpg']
+        let randomIndex = Math.floor(Math.random() * imagesItem.length)
+        itemImage.src = imagesItem[randomIndex]
+        Item.items.push(new Item(squareWidth,squareHeight,this._posX,this._posY,itemImage))
+    }
+    
 }
 
 
@@ -295,25 +330,60 @@ class Martian {
 
 const createMartians = (number) => {
     let posX = 1
+    // let itemRandom = [false, true, false, false, false, false, false, false]
+    let itemRandom = [false, true, false]
+    let randomIndex
     for (let i = 0; i < number; i++) {
-        martians.push(new Martian(70, 125, posX, 0, 1, 70, 100))
+        randomIndex = Math.floor(Math.random() * itemRandom.length)
+        martians.push(new Martian(70, 125, posX, 3, 1, 70, 100, itemRandom[randomIndex]))
         posX += 2
     }
 }
 
-//Funtions about draw elemenets
-const drawBlocks = () => {
-    blocks.forEach(block => {
-        block.draw()
-    });
-}
-//Funtions about move elements***************************************************************************************
 
+//Funtions about draw elemenets
 const drawMatians = () => {
     martians.forEach(martian => {
         martian.drawOnBoard()
     });
 }
+const drawBlocks = () => {
+    blocks.forEach(block => {
+        block.draw()
+    });
+}
+
+const drawItems = () =>{
+    Item.items.forEach(item => {
+        item.draw()
+    });
+}
+
+const drawHeader = () => {
+    let liveImage = document.createElement('IMG')
+    liveImage.src = '../assets/images/life_' + avatar._life + '.png'
+    ctx.drawImage(liveImage, 40, 7, 100, 25)
+    ctx.font = 'bold italic 15px arial';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    // Escribir texto en el canvas
+    ctx.fillText('Life', 20, 25);
+    //Score
+    ctx.font = 'bold italic 15px arial';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    // Escribir texto en el canvas
+    let score = '0000' + (Martian.enemiesDown * 50)
+    ctx.fillText('Score: ' + score.slice(-5), 500, 25);
+
+    //    ctx.font = 'bold italic 25px arial';
+    //    ctx.fillStyle = 'white';
+    //    ctx.textAlign = 'center';
+    //    // Escribir texto en el canvas
+    //    ctx.fillText('hola',500, 30);
+}
+//Funtions about move elements***************************************************************************************
+
 
 const moveMartiansX = () => {
     martians.forEach(martian => {
@@ -325,6 +395,11 @@ const moveMartiansY = () => {
         martian.moveVertical()
     });
 }
+const moveItems = () => {
+    Item.items.forEach(item => {
+        item.move()
+    });
+}
 const moveByPressKey = (event) => {
     if (event.key == 'ArrowRight' && avatar._posX < board[0].length - 1) {
         avatar._posX++
@@ -334,6 +409,19 @@ const moveByPressKey = (event) => {
     }
 
 }
+//Functions about end game
+
+const endingShow = () => {
+    ending.classList.add('showEnding')
+}
+
+const endGame = () => {
+    clearInterval(horizaontalMoving)
+    clearInterval(verticalMoving)
+    clearInterval(bulletGameLoop)
+    clearInterval(gameLoopInterval)
+    endingShow()
+}
 
 //Functions about shoot ****************************************************************************************************
 const shoot = () => {
@@ -342,19 +430,19 @@ const shoot = () => {
 
 const removeTargets = () => {
     martians = martians.filter((element) => element._life != 0)
-    if(avatar._life == 0)//Conditinal to check if avatar life is empty
-    endGame()
+    if (avatar._life == 0)//Conditinal to check if avatar life is empty
+        endGame()
 }
 
 const removeBlocks = (block) => {
     blocks = blocks.filter((element) => element != block)
 }
 
-const removeBullet = (bullet,enemy = false) => {
-    if(enemy)
-    enemy._bullets = enemy._bullets.filter((element) => element != bullet)
+const removeBullet = (bullet, enemy = false) => {
+    if (enemy)
+        enemy._bullets = enemy._bullets.filter((element) => element != bullet)
     else
-    avatar._bullets = avatar._bullets.filter((element) => element != bullet)
+        avatar._bullets = avatar._bullets.filter((element) => element != bullet)
 
 }
 
@@ -363,29 +451,34 @@ const bulletIsOnAvatar = (bullet) => {
         return avatar
 }
 
-const checkShoot = (bullet,enemy = false) => {
+const checkShoot = (bullet, enemy = false) => {
     let enemyDown
+    let dropWay
     //COnditiional to check if method is being callied by enemy bullet
-    if(enemy){
-        console.log('estoy dentro de la evaluacion del disparo del enemigo')
-        bullet.move('down')
-        bullet.draw()
+    if (enemy) {
+        dropWay = 'down'
         enemyDown = bulletIsOnAvatar(bullet)
     }
-    else{//Conditinal to check if method is being called by avatar player
-        bullet.move('up')
-        bullet.draw()
+    else {//Conditinal to check if method is being called by avatar player
+        dropWay = 'up'
         enemyDown = bullet.bulletIsOnMartian()
-    } 
+    }
+    bullet.move(dropWay)
+    bullet.draw()
     if (enemyDown) {
+        console.log(enemyDown._item)
+        if(enemyDown._item){
+            enemyDown.drop()
+        }
+        Martian.enemiesDown++
         enemyDown._life--
         removeTargets()
-        removeBullet(bullet,enemy)
+        removeBullet(bullet, enemy)
     }
     let blockDown = bullet.bulletIsOnBlock()
     if (blockDown) {
         removeBlocks(blockDown)
-        removeBullet(bullet,enemy)
+        removeBullet(bullet, enemy)
     }
 }
 
@@ -395,14 +488,14 @@ const randomEnemy = () => {
 }
 
 const isRandomShoot = () => {
-    let randomResponses = [false,false,true,false,false]
+    let randomResponses = [false, false, true, false, false, false, false, false, false]
     let randomIndex = Math.floor(Math.random() * randomResponses.length)
     return randomResponses[randomIndex]
 
 }
 
 const bulletLoop = () => {
-    if(isRandomShoot()){
+    if (isRandomShoot()) {
         let enemy = randomEnemy()
         enemy.shoot()
     }
@@ -411,7 +504,7 @@ const bulletLoop = () => {
     });
     martians.forEach(martian => {
         martian._bullets.forEach(bullet => {
-            checkShoot(bullet,martian)
+            checkShoot(bullet, martian)
         });
     });
 }
@@ -444,6 +537,8 @@ const gameLoop = () => {
     drawCanvas()
     drawMatians()
     drawBlocks()
+    drawItems()
+    drawHeader()
     avatar.drawOnBoard('white')
 
 }
@@ -451,12 +546,13 @@ const gameLoop = () => {
 const start = () => {
     const canvas = document.getElementById('canvas')
     ctx = canvas.getContext('2d')
-    avatar = new Martian(100, 150, 10, 29, 3, 600, 490)
+    avatar = new Martian(100, 150, 10, 29, 6, 600, 490)
     createMartians(20)
-    setInterval(moveMartiansX, 1000)
-    setInterval(moveMartiansY, 5000)
-    setInterval(bulletLoop, 200)
-    setInterval(gameLoop, 1000 / 60)
+    horizaontalMoving = setInterval(moveMartiansX, 1000)
+    verticalMoving = setInterval(moveMartiansY, 5000)
+    bulletGameLoop = setInterval(bulletLoop, 70)
+    itemsMoving = setInterval(moveItems,500)
+    gameLoopInterval = setInterval(gameLoop, 1000 / 60)
 }
 
 //Events
@@ -471,4 +567,11 @@ document.addEventListener('keydown', (event) => {
     if (event.key == 's') {
         shoot()
     }
+})
+
+//Event when player press a button from ending show
+
+ending.addEventListener('click', (event) => {
+    if (event.target.id == 'playAgain')
+        location.reload()
 })
