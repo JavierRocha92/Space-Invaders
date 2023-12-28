@@ -49,8 +49,8 @@ const board = [
 ]
 
 /* Classes***************************************************************************************************************** */
-class Block{
-    constructor(width,height,posX,posY){
+class Block {
+    constructor(width, height, posX, posY) {
         this._width = width
         this._height = height
         this._posX = posX
@@ -80,34 +80,40 @@ class Block{
     set posY(posY) {
         this._posY = posY
     }
-    draw(){
+    draw() {
         console.log('entro')
-        ctx.drawImage(elements,64,0,32,32,this._posX * squareWidth,this._posY * squareHeight,this._width,this._height)
+        ctx.drawImage(elements, 64, 0, 32, 32, this._posX * squareWidth, this._posY * squareHeight, this._width, this._height)
     }
 }
 let blocks = [
-    new Block(squareWidth,squareHeight,8,25),
-    new Block(squareWidth,squareHeight,9,25),
-    new Block(squareWidth,squareHeight,10,25),
-    new Block(squareWidth,squareHeight,8,26),
-    new Block(squareWidth,squareHeight,9,26),
-    new Block(squareWidth,squareHeight,10,26),
-    new Block(squareWidth,squareHeight,29,25),
-    new Block(squareWidth,squareHeight,30,25),
-    new Block(squareWidth,squareHeight,31,25),
-    new Block(squareWidth,squareHeight,29,26),
-    new Block(squareWidth,squareHeight,30,26),
-    new Block(squareWidth,squareHeight,31,26)
+    new Block(squareWidth, squareHeight, 8, 25),
+    new Block(squareWidth, squareHeight, 9, 25),
+    new Block(squareWidth, squareHeight, 10, 25),
+    new Block(squareWidth, squareHeight, 8, 26),
+    new Block(squareWidth, squareHeight, 9, 26),
+    new Block(squareWidth, squareHeight, 10, 26),
+    new Block(squareWidth, squareHeight, 18, 25),
+    new Block(squareWidth, squareHeight, 19, 25),
+    new Block(squareWidth, squareHeight, 20, 25),
+    new Block(squareWidth, squareHeight, 18, 26),
+    new Block(squareWidth, squareHeight, 19, 26),
+    new Block(squareWidth, squareHeight, 20, 26),
+    new Block(squareWidth, squareHeight, 29, 25),
+    new Block(squareWidth, squareHeight, 30, 25),
+    new Block(squareWidth, squareHeight, 31, 25),
+    new Block(squareWidth, squareHeight, 29, 26),
+    new Block(squareWidth, squareHeight, 30, 26),
+    new Block(squareWidth, squareHeight, 31, 26)
 ]
 class Bullet {
-    constructor(width,height,posX, posY,color) {
+    constructor(width, height, posX, posY, color) {
         this._width = width
         this._height = height
         this._posX = posX
         this._posY = posY
         this._color = color
     }
-    
+
     get width() {
         return this._width
     }
@@ -138,8 +144,13 @@ class Bullet {
     set color(color) {
         this._color = color
     }
-    move() {
-        this._posY--
+    move(way) {
+        if(way == 'up'){
+            this._posY--
+        }
+        else{
+            this._posY++
+        }
     }
     draw() {
         ctx.fillStyle = this._color
@@ -147,7 +158,7 @@ class Bullet {
     }
     bulletIsOnMartian() {
         for (const martian of martians) {
-            if (this._posX == martian._posX && this._posY == martian._posY){
+            if (this._posX == martian._posX && this._posY == martian._posY) {
                 return martian
             }
         }
@@ -155,7 +166,7 @@ class Bullet {
     }
     bulletIsOnBlock() {
         for (const block of blocks) {
-            if (this._posX == block._posX && this._posY == block._posY){
+            if (this._posX == block._posX && this._posY == block._posY) {
                 return block
             }
         }
@@ -240,7 +251,7 @@ class Martian {
         this._life--
     }
     drawOnBoard() {
-        ctx.drawImage(tilemap,this.frameX,this.frameY,this._width,this._height,this._posX * squareWidth, this._posY * squareHeight, squareWidth, squareHeight)
+        ctx.drawImage(tilemap, this.frameX, this.frameY, this._width, this._height, this._posX * squareWidth, this._posY * squareHeight, squareWidth, squareHeight)
     }
     moveHorizontal() {
         if (this._left) {
@@ -254,6 +265,9 @@ class Martian {
     }
     moveVertical() {
         this._posY++
+    }
+    shoot() {
+        this._bullets.push(new Bullet(10, 10, this._posX, this._posY,'yellow'))
     }
 
 }
@@ -282,10 +296,18 @@ class Martian {
 const createMartians = (number) => {
     let posX = 1
     for (let i = 0; i < number; i++) {
-        martians.push(new Martian(70,125, posX, 0, 1,70, 100))
+        martians.push(new Martian(70, 125, posX, 0, 1, 70, 100))
         posX += 2
     }
 }
+
+//Funtions about draw elemenets
+const drawBlocks = () => {
+    blocks.forEach(block => {
+        block.draw()
+    });
+}
+//Funtions about move elements***************************************************************************************
 
 const drawMatians = () => {
     martians.forEach(martian => {
@@ -312,45 +334,88 @@ const moveByPressKey = (event) => {
     }
 
 }
+
+//Functions about shoot ****************************************************************************************************
 const shoot = () => {
-    avatar.bullets.push(new Bullet(10,10,avatar._posX,avatar._posY,'white'))
+    avatar.bullets.push(new Bullet(10, 10, avatar._posX, avatar._posY, 'white'))
 }
 
-const removeEnemeies = () => {
+const removeTargets = () => {
     martians = martians.filter((element) => element._life != 0)
+    if(avatar._life == 0)//Conditinal to check if avatar life is empty
+    endGame()
 }
 
 const removeBlocks = (block) => {
     blocks = blocks.filter((element) => element != block)
 }
 
-const removeBullet = (bullet) => {
+const removeBullet = (bullet,enemy = false) => {
+    if(enemy)
+    enemy._bullets = enemy._bullets.filter((element) => element != bullet)
+    else
     avatar._bullets = avatar._bullets.filter((element) => element != bullet)
+
+}
+
+const bulletIsOnAvatar = (bullet) => {
+    if (bullet._posX == avatar._posX && bullet._posY == avatar._posY)
+        return avatar
+}
+
+const checkShoot = (bullet,enemy = false) => {
+    let enemyDown
+    //COnditiional to check if method is being callied by enemy bullet
+    if(enemy){
+        console.log('estoy dentro de la evaluacion del disparo del enemigo')
+        bullet.move('down')
+        bullet.draw()
+        enemyDown = bulletIsOnAvatar(bullet)
+    }
+    else{//Conditinal to check if method is being called by avatar player
+        bullet.move('up')
+        bullet.draw()
+        enemyDown = bullet.bulletIsOnMartian()
+    } 
+    if (enemyDown) {
+        enemyDown._life--
+        removeTargets()
+        removeBullet(bullet,enemy)
+    }
+    let blockDown = bullet.bulletIsOnBlock()
+    if (blockDown) {
+        removeBlocks(blockDown)
+        removeBullet(bullet,enemy)
+    }
+}
+
+const randomEnemy = () => {
+    let randomIndex = Math.floor(Math.random() * martians.length)
+    return martians[randomIndex]
+}
+
+const isRandomShoot = () => {
+    let randomResponses = [false,false,true,false,false]
+    let randomIndex = Math.floor(Math.random() * randomResponses.length)
+    return randomResponses[randomIndex]
+
 }
 
 const bulletLoop = () => {
+    if(isRandomShoot()){
+        let enemy = randomEnemy()
+        enemy.shoot()
+    }
     avatar._bullets.forEach(bullet => {
-        bullet.move()
-        bullet.draw()
-        let enemyDown = bullet.bulletIsOnMartian()
-        if (enemyDown) {
-            enemyDown._life--
-            removeEnemeies()
-            removeBullet(bullet)
-        }
-        let blockDown = bullet.bulletIsOnBlock()
-        if (blockDown) {
-            removeBlocks(blockDown)
-            removeBullet(bullet)
-        }
+        checkShoot(bullet)
+    });
+    martians.forEach(martian => {
+        martian._bullets.forEach(bullet => {
+            checkShoot(bullet,martian)
+        });
     });
 }
 
-const drawBlocks = () => {
-    blocks.forEach(block => {
-        block.draw()
-    });
-}
 
 //Final about create elements
 
@@ -386,7 +451,7 @@ const gameLoop = () => {
 const start = () => {
     const canvas = document.getElementById('canvas')
     ctx = canvas.getContext('2d')
-    avatar = new Martian( 100, 150, 10, 29, 3,600, 490)
+    avatar = new Martian(100, 150, 10, 29, 3, 600, 490)
     createMartians(20)
     setInterval(moveMartiansX, 1000)
     setInterval(moveMartiansY, 5000)
