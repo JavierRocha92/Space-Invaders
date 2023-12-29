@@ -9,6 +9,7 @@ let canvasWidth = 800
 let canvasHeight = 600
 let martians = []
 let avatar
+let pointMultiplier = 1
 
 //Images
 let pathTilemap = '../assets/images/tilemap.jpg'
@@ -17,9 +18,6 @@ tilemap.src = pathTilemap
 let pathElements = '../assets/images/elements.png'
 let elements = document.createElement('IMG')
 elements.src = pathElements
-let pathBlock = '../assets/images/block.png'
-let imageBlock = document.createElement('IMG')
-imageBlock.src = pathBlock
 let itemImage = document.createElement('IMG')
 
 //Interval variables
@@ -66,12 +64,12 @@ const board = [
 /* Classes***************************************************************************************************************** */
 
 class Item {
-    constructor(width, height, posX, posY, picture) {
+    constructor(width, height, posX, posY, type) {
         this._width = width
         this._height = height
         this._posX = posX
         this._posY = posY
-        this._picture = picture
+        this._type = type
     }
     static items = []
     get width() {
@@ -98,39 +96,50 @@ class Item {
     set posY(posY) {
         this._posY = posY
     }
-    get picture() {
-        return this._picture
+    get type() {
+        return this._type
     }
-    set picture(picture) {
-        this._picture = picture
+    set type(type) {
+        this._type = type
     }
     draw() {
-        ctx.drawImage(this._picture, this._posX * squareWidth, this._posY * squareHeight, this._width, this._height)
+        itemImage = document.createElement('IMG')
+        // ./assets/images/items/block.png
+        itemImage.src = './assets/images/items/' + this._type + '.jpg'
+        ctx.drawImage(itemImage, this._posX * squareWidth, this._posY * squareHeight, this._width, this._height)
     }
-   
-    move(){
+
+    move() {
         this._posY++
+    }
+    isOnAvatar() {
+        if (this._posX == avatar._posX && this._posY == avatar._posY){
+            Item.items = Item.items.filter((item) => item != this)
+            return true
+        }
+        else
+            return false
     }
 }
 let blocks = [
-    new Item(squareWidth, squareHeight, 8, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 9, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 10, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 8, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 9, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 10, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 18, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 19, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 20, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 18, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 19, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 20, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 29, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 30, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 31, 25, imageBlock),
-    new Item(squareWidth, squareHeight, 29, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 30, 26, imageBlock),
-    new Item(squareWidth, squareHeight, 31, 26, imageBlock)
+    new Item(squareWidth, squareHeight, 8, 25, 'block'),
+    new Item(squareWidth, squareHeight, 9, 25, 'block'),
+    new Item(squareWidth, squareHeight, 10, 25, 'block'),
+    new Item(squareWidth, squareHeight, 8, 26, 'block'),
+    new Item(squareWidth, squareHeight, 9, 26, 'block'),
+    new Item(squareWidth, squareHeight, 10, 26, 'block'),
+    new Item(squareWidth, squareHeight, 18, 25, 'block'),
+    new Item(squareWidth, squareHeight, 19, 25, 'block'),
+    new Item(squareWidth, squareHeight, 20, 25, 'block'),
+    new Item(squareWidth, squareHeight, 18, 26, 'block'),
+    new Item(squareWidth, squareHeight, 19, 26, 'block'),
+    new Item(squareWidth, squareHeight, 20, 26, 'block'),
+    new Item(squareWidth, squareHeight, 29, 25, 'block'),
+    new Item(squareWidth, squareHeight, 30, 25, 'block'),
+    new Item(squareWidth, squareHeight, 31, 25, 'block'),
+    new Item(squareWidth, squareHeight, 29, 26, 'block'),
+    new Item(squareWidth, squareHeight, 30, 26, 'block'),
+    new Item(squareWidth, squareHeight, 31, 26, 'block')
 ]
 class Bullet {
     constructor(width, height, posX, posY, color) {
@@ -202,7 +211,7 @@ class Bullet {
 }
 
 class Martian {
-    constructor(width, height, posX, posY, life, frameX, frameY, item = false, left = true, bullets = []) {
+    constructor(width, height, posX, posY, life, frameX, frameY, item = false, left = true, bullets = [],field = false) {
         this._width = width
         this._height = height
         this._posX = posX
@@ -213,6 +222,7 @@ class Martian {
         this._left = left
         this._item = item
         this._bullets = bullets
+        this._field = field
     }
     static enemiesDown = 0
     get width() {
@@ -275,6 +285,12 @@ class Martian {
     set bullets(bullets) {
         this._bullets = bullets
     }
+    get field() {
+        return this._field
+    }
+    set field(field) {
+        this._field = field
+    }
     decreaseLife() {
         this._life--
     }
@@ -297,14 +313,44 @@ class Martian {
     shoot() {
         this._bullets.push(new Bullet(10, 10, this._posX, this._posY, 'yellow'))
     }
-    drop(){
-        console.log('entro en el emtodo de drop')
-        let imagesItem = ['../assets/images/powerUps__doublePoints.jpg','../assets/images/powerUps__hearth.jpg','../assets/images/powerUps__field.jpg','../assets/images/powerUps__random.jpg']
+    drop() {
+        let imagesItem = [
+            'field'
+        ]
+        // let imagesItem = [
+        //     'doublePoints',
+        //     'hearth',
+        //     'field',
+        //     'randon'
+        // ]
         let randomIndex = Math.floor(Math.random() * imagesItem.length)
-        itemImage.src = imagesItem[randomIndex]
-        Item.items.push(new Item(squareWidth,squareHeight,this._posX,this._posY,itemImage))
+        Item.items.push(new Item(squareWidth, squareHeight, this._posX, this._posY, imagesItem[randomIndex]))
     }
     
+    addPowerUp(item){
+    switch (item._type) {
+        case 'random':
+            break
+        case 'doublePoints':
+            pointMultiplier *= 2
+            setTimeout(() => {
+                pointMultiplier = 1
+            },5000)
+            break
+        case 'hearth':
+            if (this._life < 6)
+                this._life++
+            break
+        case 'field':
+            this._field = true
+            setTimeout(() => {
+                this._field = false
+            },5000)
+            break
+    }
+}
+    
+
 }
 
 
@@ -342,6 +388,16 @@ const createMartians = (number) => {
 
 
 //Funtions about draw elemenets
+const drawCanvas = () => {
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] == 0) {
+                ctx.fillRect(j * squareWidth, i * squareHeight, squareWidth, squareHeight)
+                ctx.fillStyle = 'black'
+            }
+        }
+    }
+}
 const drawMatians = () => {
     martians.forEach(martian => {
         martian.drawOnBoard()
@@ -353,7 +409,7 @@ const drawBlocks = () => {
     });
 }
 
-const drawItems = () =>{
+const drawItems = () => {
     Item.items.forEach(item => {
         item.draw()
     });
@@ -373,7 +429,7 @@ const drawHeader = () => {
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     // Escribir texto en el canvas
-    let score = '0000' + (Martian.enemiesDown * 50)
+    let score = '0000' + (Martian.enemiesDown * 50 * pointMultiplier)
     ctx.fillText('Score: ' + score.slice(-5), 500, 25);
 
     //    ctx.font = 'bold italic 25px arial';
@@ -428,10 +484,12 @@ const shoot = () => {
     avatar.bullets.push(new Bullet(10, 10, avatar._posX, avatar._posY, 'white'))
 }
 
+//Functions about remove elements
+
 const removeTargets = () => {
     martians = martians.filter((element) => element._life != 0)
     if (avatar._life == 0)//Conditinal to check if avatar life is empty
-        endGame()
+    endGame()
 }
 
 const removeBlocks = (block) => {
@@ -440,9 +498,20 @@ const removeBlocks = (block) => {
 
 const removeBullet = (bullet, enemy = false) => {
     if (enemy)
-        enemy._bullets = enemy._bullets.filter((element) => element != bullet)
-    else
-        avatar._bullets = avatar._bullets.filter((element) => element != bullet)
+    enemy._bullets = enemy._bullets.filter((element) => element != bullet)
+else
+avatar._bullets = avatar._bullets.filter((element) => element != bullet)
+
+}
+
+//Final about remove elements
+
+//Functions about if elements exist
+
+const isRandomShoot = () => {
+    let randomResponses = [false, false, true, false, false, false, false, false, false]
+    let randomIndex = Math.floor(Math.random() * randomResponses.length)
+    return randomResponses[randomIndex]
 
 }
 
@@ -450,6 +519,10 @@ const bulletIsOnAvatar = (bullet) => {
     if (bullet._posX == avatar._posX && bullet._posY == avatar._posY)
         return avatar
 }
+
+//Final about exists
+
+//Function about check elements*************************************************************************************************************
 
 const checkShoot = (bullet, enemy = false) => {
     let enemyDown
@@ -467,11 +540,13 @@ const checkShoot = (bullet, enemy = false) => {
     bullet.draw()
     if (enemyDown) {
         console.log(enemyDown._item)
-        if(enemyDown._item){
+        if (enemyDown._item) {
             enemyDown.drop()
         }
         Martian.enemiesDown++
-        enemyDown._life--
+        if(!enemyDown._field){
+            enemyDown._life--
+        }
         removeTargets()
         removeBullet(bullet, enemy)
     }
@@ -482,16 +557,19 @@ const checkShoot = (bullet, enemy = false) => {
     }
 }
 
+const checkItems = () => {
+    Item.items.forEach(item => {
+        if (item.isOnAvatar()) {
+            avatar.addPowerUp(item)
+        }
+    });
+}
+//Final about check items
+
+
 const randomEnemy = () => {
     let randomIndex = Math.floor(Math.random() * martians.length)
     return martians[randomIndex]
-}
-
-const isRandomShoot = () => {
-    let randomResponses = [false, false, true, false, false, false, false, false, false]
-    let randomIndex = Math.floor(Math.random() * randomResponses.length)
-    return randomResponses[randomIndex]
-
 }
 
 const bulletLoop = () => {
@@ -516,28 +594,28 @@ const bulletLoop = () => {
 
 //Functions about canvas
 
-const drawCanvas = () => {
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[0].length; j++) {
-            if (board[i][j] == 0) {
-                ctx.fillRect(j * squareWidth, i * squareHeight, squareWidth, squareHeight)
-                ctx.fillStyle = 'black'
-            }
-        }
-    }
-}
 
 const clearCanvas = () => {
     canvas.width = canvasWidth
     canvas.height = canvasHeight
 }
 
-const gameLoop = () => {
+const handleItems = () => {
+    drawItems()
+    checkItems()
+}
+
+const handleCanvas = () => {
     clearCanvas()
     drawCanvas()
+}
+
+const gameLoop = () => {
+    console.log(pointMultiplier)
+    handleCanvas()
     drawMatians()
+    handleItems()
     drawBlocks()
-    drawItems()
     drawHeader()
     avatar.drawOnBoard('white')
 
@@ -551,7 +629,7 @@ const start = () => {
     horizaontalMoving = setInterval(moveMartiansX, 1000)
     verticalMoving = setInterval(moveMartiansY, 5000)
     bulletGameLoop = setInterval(bulletLoop, 70)
-    itemsMoving = setInterval(moveItems,500)
+    itemsMoving = setInterval(moveItems, 500)
     gameLoopInterval = setInterval(gameLoop, 1000 / 60)
 }
 
@@ -573,5 +651,8 @@ document.addEventListener('keydown', (event) => {
 
 ending.addEventListener('click', (event) => {
     if (event.target.id == 'playAgain')
-        location.reload()
+    location.reload()
 })
+
+ 
+
