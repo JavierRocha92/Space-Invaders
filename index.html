@@ -19,19 +19,35 @@
 <body>
     <div class="container">
         <header class="header">
-            <img src="./assets/images/items/block.png" alt="">
+            <!-- <img src="./assets/images/items/flmae04.jpg" alt=""> -->
+            <!-- <img src="./assets/images/.jpg" alt=""> -->
         </header>
         <main class="main">
            <!-- canvas tag -->
            <canvas class="canvas" id="canvas" width="800" height="600"></canvas>
+           <!-- CONTAINER ENDING -->
            <div class="ending w-100 border p-5 bg-dark" id="ending">
-            <header class="ending__header d-flex justify-content-center w-100 mb-5">
-                <img src="./assets/images/game_over.png" alt="" class="ending__image">
-            </header>
-            <main class="ending__main d-flex justify-content-center">
+            <div class="ending__header d-flex justify-content-center w-100 mb-5">
+                <img src="." alt="" class="ending__image">
+            </div>
+            <div class="ending__score" id="score"></div>
+            <div class="ending__main d-flex justify-content-center">
                 <button class="ending__button m-4 w-25" id="playAgain">Play Again</button>
                 <button class="ending__button m-4 w-25" id="retire">Retire</button>
-            </main>
+            </div>
+           </div>
+           <!-- CONTIANER SART -->
+           <div class="start w-100 border p-5 bg-dark" id="start">
+            <div class="start__header d-flex justify-content-center w-100 mb-5">
+                <img src="./assets/images/start_game.png" alt="" class="start__image">
+            </div>
+            <div class="name text-center" id="name">
+                <h2 class="name__title">Type your name</h2>
+                <input placeholder="_ _ _ _ _ _ " class="username fs-2 bg-dark border p-1" id="username">
+            </div>
+            <div class="start__main d-flex justify-content-center">
+                <button class="start__button m-4 w-25" id="start-button">Play</button>
+            </div>
            </div>
         </main>
         <footer class="footer">

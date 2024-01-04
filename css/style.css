@@ -24,12 +24,36 @@ body{
     opacity: 0;
     transform: translate(0);
 }
+.ending__image{
+    width: 80%;
+    height: 300px;
+}
+.start{
+    opacity: 1;
+    transform: translateY(-187%);
+    width: 800px;
+    height: 600px;
+}
+.name{
+    color: white;
+}
+.username{
+    width: 160px;
+    color: white;
+}
 .showEnding{
     /* opacity: 0; */
     animation-name: showEnding;
     animation-duration: 1s;
     animation-timing-function: ease;
     animation-fill-mode:forwards;
+}
+.score__table{
+    border: 1px solid white !important;
+    border-collapse: separate !important;
+}
+.score__tr,.score__td{
+    border: 1px solid white !important;
 }
 
 @keyframes showEnding {
@@ -39,6 +63,25 @@ body{
     }
     to{
         opacity: 1;
-        transform: translateY(-150%);
+        transform: translateY(-100%);
     }
 }
+.hideStart{
+    /* opacity: 0; */
+    animation-name: hideStart;
+    animation-duration: 1s;
+    animation-timing-function: ease;
+    animation-fill-mode:forwards;
+}
+
+@keyframes hideStart {
+    form{
+        opacity: 1;
+        transform: translate(-187%);
+    }
+    to{
+        opacity: 0;
+        transform: translateY(0%);
+    }
+}
+
